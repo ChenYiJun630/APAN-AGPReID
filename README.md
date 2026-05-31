@@ -41,7 +41,7 @@ bash train_CARGO.sh
 ```
 
 
-Use the following command to test APAN on the CARGO dataset:
+Use the following command to evaluate APAN. The trained weights for testing are available at [Google Drive](https://drive.google.com/drive/my-drive?dmr=1&ec=wgc-drive-%5Bmodule%5D-goto).
 
 ```bash
 bash test.sh
