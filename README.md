@@ -60,7 +60,7 @@ bash test.sh
 ![AGReIDv2](./assets/AGReIDv2.png)
 
 **Comparative retrieval performance on the AG-ReID dataset.** The highest and second-highest scores are formatted in bold and underlined text, respectively.
-<img src="./assets/AGReID.png" width="65%"/>
+<img src="./assets/AGReID.png" width="70%"/>
 
 
 ## 🙏 Acknowledgement

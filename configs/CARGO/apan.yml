@@ -22,8 +22,6 @@ MODEL:
     PROMPT_LEN: 64
     PROMPT_DEPTH: 2
     USE_PRM: True
-
-    #我自己的
     USE_GATE: False
     TOPK: 16
     DELTA1: 1.0
@@ -47,8 +45,7 @@ MODEL:
       VIEW_ID: True
       VIEW_OREG: True
       VIEW_LAMBDA: 0.001
-      #原来是0.001
-
+      
     TRI:
       MARGIN: 0.0
       HARD_MINING: True
@@ -84,7 +81,6 @@ SOLVER:
     ENABLED: True
   OPT: SGD
   MAX_EPOCH: 120
-  #####################################
   BASE_LR: 0.008
   WEIGHT_DECAY: 0.0001
   IMS_PER_BATCH: 128
@@ -109,4 +105,4 @@ CUDNN_BENCHMARK: True
 DATASETS:
   NAMES: ("CARGO",)
   TESTS: ("CARGO", "CARGO_AG","CARGO_AA", "CARGO_GG")
-OUTPUT_DIR: /workspace/AGReID/My-AGPReID-Project/FuXianlogs/CARGO/b64_g4_lr0.008_lambda0.001_a0.01_b1.2_delta1.0_deltaSec1.0_M32_nogate_test
+OUTPUT_DIR: XXX

@@ -9,7 +9,7 @@ MODEL:
     DEPTH: base
     FEAT_DIM: 768
     PRETRAIN: True
-    PRETRAIN_PATH: /workspace/PretrainModel/ViT/jx_vit_base_p16_224-80ecf9dd.pth
+    PRETRAIN_PATH: XXX
     STRIDE_SIZE: (16, 16)
     DROP_PATH_RATIO: 0.1
     DROP_RATIO: 0.0
@@ -93,4 +93,4 @@ DATASETS:
   TESTS: ("AG_ReID", "AG_ReID_G2A")
   # TESTS: ("GAReID_A2GG", "GAReID_G2AA")
 
-OUTPUT_DIR: logs/AG_ReID/VDT
+OUTPUT_DIR: XXX

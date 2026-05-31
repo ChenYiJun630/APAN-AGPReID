@@ -1,16 +1,16 @@
 
 MODEL:
-  META_ARCHITECTURE: Baseline_multiview_VQD
+  META_ARCHITECTURE: Baseline
   PIXEL_MEAN: [127.5, 127.5, 127.5]
   PIXEL_STD: [127.5, 127.5, 127.5]
   USE_QUERY_FEAT: False
 
   BACKBONE:
-    NAME: build_multiview_vit_backbone_VQD
+    NAME: build_vit_backbone
     DEPTH: base
     FEAT_DIM: 768
     PRETRAIN: True
-    PRETRAIN_PATH: /workspace/PretrainModel/ViT/jx_vit_base_p16_224-80ecf9dd.pth
+    PRETRAIN_PATH: XXX
     STRIDE_SIZE: (16, 16)
     DROP_PATH_RATIO: 0.1
     DROP_RATIO: 0.0
@@ -96,4 +96,4 @@ DATASETS:
   TESTS: ("AG_ReID", "AG_ReID_G2A")
   # TESTS: ("GAReID_A2GG", "GAReID_G2AA")
 
-OUTPUT_DIR: logs/AG_ReID/ViT_base
+OUTPUT_DIR: XXX

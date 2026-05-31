@@ -10,7 +10,7 @@ MODEL:
     DEPTH: base
     FEAT_DIM: 768
     PRETRAIN: True
-    PRETRAIN_PATH: /workspace/PretrainModel/ViT/jx_vit_base_p16_224-80ecf9dd.pth
+    PRETRAIN_PATH: XXX
     STRIDE_SIZE: (16, 16)
     DROP_PATH_RATIO: 0.1
     DROP_RATIO: 0.0
@@ -29,7 +29,7 @@ MODEL:
     CLS_LAYER: Linear
 
   LOSSES:
-    NAME: ("CrossEntropyLoss", "TripletLoss",)
+    NAME: ("CrossEntropyLoss", "TripletLoss")
 
     CE:
       EPSILON: 0.
@@ -96,4 +96,4 @@ DATASETS:
   NAMES: ("CARGO",)
   TESTS: ("CARGO", "CARGO_GG", "CARGO_AA", "CARGO_AG",)
 
-OUTPUT_DIR: logs/CARGO/ViT/b64_g1
+OUTPUT_DIR: XXX
