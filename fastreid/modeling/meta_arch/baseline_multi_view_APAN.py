@@ -60,9 +60,6 @@ class Baseline_multiview_APAN(nn.Module):
         self.register_buffer('pixel_mean', torch.Tensor(pixel_mean).view(1, -1, 1, 1), False)
         self.register_buffer('pixel_std', torch.Tensor(pixel_std).view(1, -1, 1, 1), False)
 
-        self.gem = nn.Sequential()  # 空容器也行
-        self.gem.sigweight = nn.Parameter(torch.tensor(0.1))
-
     @classmethod
     def from_config(cls, cfg):
         backbone = build_backbone(cfg)
@@ -127,9 +124,7 @@ class Baseline_multiview_APAN(nn.Module):
 
     def forward(self, batched_inputs):
         images = self.preprocess_image(batched_inputs)
-        # print(batched_inputs.keys())
-
-        #摄像头ID
+       
         if 'camids' in batched_inputs.keys():
             camids = batched_inputs['camids']
         else:
@@ -142,17 +137,16 @@ class Baseline_multiview_APAN(nn.Module):
         global_feats, local_feats, view_feats= self.backbone(images, camids)
         
         features = global_feats - view_feats
-        # features = global_feats 
+     
         
 
         if self.training:
             assert "targets" in batched_inputs, "Person ID annotation are missing in training!"
             targets = batched_inputs["targets"]
 
-            #视角标签
+          
             temp = torch.zeros((targets.shape[0])).long().to(targets.device)
-            #创建一个与当前 batch 中样本数量相同的一维张量，初始值全为 0。
-            temp[view1_index] = 1#空中视角设置为1
+            temp[view1_index] = 1
             targets_view = temp
 
             # PreciseBN flag, When do preciseBN on different dataset, the number of classes in new dataset
@@ -161,33 +155,28 @@ class Baseline_multiview_APAN(nn.Module):
             if targets.sum() < 0: targets.zero_()
 
 
-            #对比VDT,训练和推理阶段都多了local的分类头
-            #多分类头,不同的分类头训练不同的特征子空间
-            outputs = self.heads(features, targets)#主分类头
-            outputs_global = self.heads(global_feats, targets)#原始全局特征分类头
-            local_outputs = self.local_heads(local_feats, targets)#局部特征分类头，通过更细粒度的特征来增强区分性
-            view_outputs = self.view_heads(view_feats, targets_view)#区分不同视觉的分类头，帮助模型学习到区分不同视角特征的能力。
+            outputs = self.heads(features, targets)
+            outputs_global = self.heads(global_feats, targets)
+            local_outputs = self.local_heads(local_feats, targets)
+            view_outputs = self.view_heads(view_feats, targets_view)
 
             losses = self.losses(outputs, outputs_global, local_outputs, view_outputs, targets, targets_view)
             return losses
         else:
             outputs = self.heads(features)
             local_outputs = self.local_heads(local_feats)
-            # print("测试阶段")
-            # print("outputs shape:", outputs.shape)
-            # print("local_outputs shape:", local_outputs.shape)
             if self.use_secap:
                 outputs = torch.cat((outputs, local_outputs), dim=1)
             return outputs
 
-    #对输入图片进行归一化处理
+
     def preprocess_image(self, batched_inputs):
         """
         Normalize and batch the input images.
         """
-        if isinstance(batched_inputs, dict):#若为字典
+        if isinstance(batched_inputs, dict):
             images = batched_inputs['images']
-        elif isinstance(batched_inputs, torch.Tensor):#若为tensor,则直接使用
+        elif isinstance(batched_inputs, torch.Tensor):
             images = batched_inputs
         else:
             raise TypeError("batched_inputs must be dict or torch.Tensor, but get {}".format(type(batched_inputs)))
@@ -202,9 +191,9 @@ class Baseline_multiview_APAN(nn.Module):
         """
         # model predictions
         # fmt: off
-        pred_class_logits = outputs['pred_class_logits'].detach()#提取预测类别的logits（未经softmax）。
-        cls_outputs = outputs['cls_outputs']#提取分类输出结果（通常是经过softmax的概率分布）
-        pred_features = outputs['features']#提取特征向量
+        pred_class_logits = outputs['pred_class_logits'].detach()
+        cls_outputs = outputs['cls_outputs']
+        pred_features = outputs['features']
         
         view_pred_class_logits = outputs_view['pred_class_logits'].detach()
         view_cls_outputs = outputs_view['cls_outputs']
@@ -221,16 +210,15 @@ class Baseline_multiview_APAN(nn.Module):
 
         # Log prediction accuracy
         log_accuracy(pred_class_logits, gt_labels)
-        #这行代码记录了当前模型对分类任务的准确度，pred_class_logits 是模型的预测结果，gt_labels 是实际标签。也就是target
 
-        loss_dict = {}#存储所有损失
+
+        loss_dict = {}
         loss_names = self.loss_kwargs['loss_names']
 
-        #获取视角相关配置参数
         view_kwargs = self.loss_kwargs.get('ce')
-        view_id_flag = view_kwargs.get('view_id')#是否使用视角损失
-        view_oreg_flag = view_kwargs.get('view_oreg')#是否使用视角正交损失
-        view_lambda = view_kwargs.get('view_lambda')#视角损失权重参数
+        view_id_flag = view_kwargs.get('view_id')
+        view_oreg_flag = view_kwargs.get('view_oreg')
+        view_lambda = view_kwargs.get('view_lambda')
 
         if 'ADMLoss' in loss_names:
                 admloss_kwarge=self.loss_kwargs.get('adm')
@@ -238,7 +226,7 @@ class Baseline_multiview_APAN(nn.Module):
                     cls_outputs,
                     gt_labels,
                     admloss_kwarge.get('beta'),
-                     admloss_kwarge.get('alpha'),
+                    admloss_kwarge.get('alpha'),
 
                 ) 
                 if self.use_secap:
@@ -260,7 +248,7 @@ class Baseline_multiview_APAN(nn.Module):
         if 'TripletLoss' in loss_names:
             tri_kwargs = self.loss_kwargs.get('tri')
             loss_dict['loss_triplet_id'] = triplet_loss(
-                pred_features,#特征
+                pred_features,
                 gt_labels,
                 tri_kwargs.get('margin'),
                 tri_kwargs.get('norm_feat'),
@@ -276,7 +264,6 @@ class Baseline_multiview_APAN(nn.Module):
                 ) * tri_kwargs.get('scale')
 
         # calc oreg loss part
-        #视角正交损失
         if view_oreg_flag:
             loss_dict['loss_oreg'] = torch.cosine_similarity(pred_features, view_pred_features).abs().mean() * view_lambda
 

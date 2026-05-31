@@ -35,7 +35,7 @@ MODEL:
     SCALE: 2
 
   LOSSES:
-    NAME: ("CrossEntropyLoss", "TripletLoss","GemLoss")
+    NAME: ("CrossEntropyLoss", "TripletLoss","ADMLoss")
 
     CE:
       EPSILON: 0.

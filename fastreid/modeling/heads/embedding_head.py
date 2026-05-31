@@ -41,17 +41,15 @@ class ChannelAttention(nn.Module):
 class CBAMBlock(nn.Module):
     def __init__(self, in_ch, ratio=16, kernel_size=7):
         super().__init__()
-        # 通道注意力
         self.ca = ChannelAttention(in_ch, reduction_ratio=ratio)
-        # 空间注意力
         self.spatial = nn.Sequential(
             nn.Conv2d(2, 1, kernel_size, padding=kernel_size//2, bias=False),
             nn.Sigmoid()
         )
     def forward(self, x):
-        # 通道注意力
+
         x = self.ca(x)
-        # 空间注意力
+      
         avg = torch.mean(x, dim=1, keepdim=True)
         mx  = torch.max(x, dim=1, keepdim=True)[0]
         sa = torch.cat([avg, mx], dim=1)       # [B,2,H,W]

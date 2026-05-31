@@ -100,29 +100,18 @@ class ReidEvaluator(DatasetEvaluator):
         dist = build_dist(query_features, gallery_features, self.cfg.TEST.METRIC)
 
 
-        #重排序
-        #利用图结构（graph-based propagation）重新计算样本之间的距离，使得：
-            # 同一身份的样本之间更接近
-            # 不同身份的样本之间更远离
+
         if self.cfg.TEST.RERANK.ENABLED:
             logger.info("Test with rerank setting")
             k1 = self.cfg.TEST.RERANK.K1#20#KNN 中的最近邻个数，用于构建图结构
             k2 = self.cfg.TEST.RERANK.K2#6#KNN 中的次近邻个数，用于传播相似性
             lambda_value = self.cfg.TEST.RERANK.LAMBDA#0.3#权重系数，控制初始距离和重排序距离的融合比例
 
-            # 如果使用余弦距离，则先进行归一化 以确保重排序时的距离计算正确。
-            # 如果使用欧氏距离，则不需要归一化。
-            # 归一化可以提高重排序的效果。
-            # 归一化后，特征向量的模长为1，距离计算时只考虑方向。这样可以避免特征向量的模长对距离计算的影响。
             if self.cfg.TEST.METRIC == "cosine":
                 query_features = F.normalize(query_features, dim=1)
                 gallery_features = F.normalize(gallery_features, dim=1)
 
-            # 计算重排序距离矩阵
-            # 使用 Jaccard 距离进行重排序
-            # Jaccard 距离适用于二值特征或稀疏特征，计算两个集合的交集和并集的比率。
-            # 这里使用 Jaccard 距离进行重排序，适用于特征向量的稀疏性较高的情况。
-            # 如果特征向量是 dense 的，可以使用欧氏距离或余弦距离进行重排序。
+
             rerank_dist = build_dist(query_features, gallery_features, metric="jaccard", k1=k1, k2=k2)
             #融合原始距离和重排序距离
             dist = rerank_dist * (1 - lambda_value) + dist * lambda_value

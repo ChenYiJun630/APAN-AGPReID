@@ -123,40 +123,39 @@ class CrossAttention(nn.Module):
 
     def __init__(
         self,
-        embedding_dim: int,         # 输入channel
-        num_heads: int,             # attention的head数
-        downsample_rate: int = 1,   # 下采样
+        embedding_dim: int,         
+        num_heads: int,            
+        downsample_rate: int = 1,   
     ) -> None:
         super().__init__()
         self.embedding_dim = embedding_dim
         self.internal_dim = embedding_dim // downsample_rate
         self.num_heads = num_heads
         assert self.internal_dim % num_heads == 0, "num_heads must divide embedding_dim."
-        # qkv获取
+       
         self.q_proj = nn.Linear(embedding_dim, self.internal_dim)
         self.k_proj = nn.Linear(embedding_dim, self.internal_dim)
         self.v_proj = nn.Linear(embedding_dim, self.internal_dim)
         self.out_proj = nn.Linear(self.internal_dim, embedding_dim)
 
-    #头部分离
+    
     def _separate_heads(self, x, num_heads: int) :
         b, n, c = x.shape
         x = x.reshape(b, n, num_heads, c // num_heads)
         return x.transpose(1, 2)  # B x N_heads x N_tokens x C_per_head
-    #头重组
+   
     def _recombine_heads(self, x):
         b, n_heads, n_tokens, c_per_head = x.shape
         x = x.transpose(1, 2)
         return x.reshape(b, n_tokens, n_heads * c_per_head)  # B x N_tokens x C
 
     def forward(self, q, k, v) :
-        # Input projections
+        
         q = self.q_proj(q)
         k = self.k_proj(k)
         v = self.v_proj(v)
 
-        # Separate into heads
-        # B,N_heads,N_tokens,C_per_head
+      
         q = self._separate_heads(q, self.num_heads)
         k = self._separate_heads(k, self.num_heads)
         v = self._separate_heads(v, self.num_heads)
@@ -434,7 +433,7 @@ class APAN_Network(nn.Module):
 
 
 
-#原始图片，不重叠
+
 class PatchEmbed(nn.Module):
     """ Image to Patch Embedding
     """
@@ -458,7 +457,7 @@ class PatchEmbed(nn.Module):
         x = self.proj(x).flatten(2).transpose(1, 2)
         return x
 
-#输入的数据为CNN得到的特征，而不是图片
+
 class HybridEmbed(nn.Module):
     """ CNN Feature Map Embedding
     Extract feature map from CNN, flatten, project to embedding dim.
@@ -500,7 +499,7 @@ class HybridEmbed(nn.Module):
         x = self.proj(x).flatten(2).transpose(1, 2)
         return x
 
-#将输入图像分割成具有重叠区域的Patch（原始图片）
+
 class PatchEmbed_overlap(nn.Module):
     """ Image to Patch Embedding with overlapping patches
     """
@@ -652,8 +651,7 @@ class VisionTransformer_multiview(nn.Module):
             x = x + self.pos_embed
 
         x = self.pos_drop(x)
-        #特征提取块
-        if self.local_feat:#若使用局部特征提取，则只遍历 Transformer 块的前 depth-1 层。
+        if self.local_feat:
             for blk in self.blocks[:-1]:
                 x = blk(x)
                 # perform inner sub
@@ -768,10 +766,9 @@ class build_resnet(nn.Module):
 
         if pretrain_choice == 'imagenet':
             self.base.load_param(model_path)
-            # print('Loading pretrained ImageNet model......from {}'.format(model_path))
+           
         self.gap = GeM()
-        # self.classifier = nn.Linear(self.in_planes, self.num_classes, bias=False)
-        # self.classifier.apply(weights_init_classifier)
+       
         self.bottleneck = nn.BatchNorm1d(self.in_planes)
         self.bottleneck.bias.requires_grad_(False)
         self.bottleneck.apply(weights_init_kaiming)
@@ -811,12 +808,11 @@ class LocalRefinementUnits(nn.Module):
         self.channels = dim
         self.out_dim = out_dim
         self.dwconv = nn.Conv2d(self.channels, self.channels, kernel, 1, padding=0, groups=self.channels)
-        #深度可分离卷积，只对每个通道独立卷积不做跨通道），保留局部空间信息，不增加通道之间的信息交互
         self.bn1 = nn.BatchNorm2d(self.channels)
         self.ptconv = nn.Conv2d(self.channels, self.out_dim, 1, 1)
-        #逐点卷积（Pointwise Convolution），1x1 卷积，用于通道转换（通常结合深度卷积使用）将通道数变为 out_dim。
+        
         self.bn2 = nn.BatchNorm2d(self.out_dim)
-        self.act1 = nn.PReLU()#使用了 PReLU（带学习参数的ReLU） 激活函数，比普通 ReLU 更灵活
+        self.act1 = nn.PReLU()
         self.act2 = nn.PReLU()
         self.act = nn.ReLU()
 
@@ -846,26 +842,22 @@ class MultiScaleLRU(nn.Module):
         return x
 
 
-#位置嵌入调整函数
-#保证了嵌入特征在不同分辨率下依然具有相似的空间布局。
+
 def resize_pos_embed(posemb, posemb_new, hight, width, cls_token_num):
     # Rescale the grid of position embeddings when loading from state_dict. Adapted from
     # https://github.com/google-research/vision_transformer/blob/00883dd691c63a6830751563748663526e811cee/vit_jax/checkpoint.py#L224
 
-    ntok_new = posemb_new.shape[1]#获取新的嵌入数量
-
+    ntok_new = posemb_new.shape[1]
     posemb_token, posemb_grid = posemb[:, :cls_token_num], posemb[0, 1:]
-    #提取分类标记 (CLS token) 的嵌入，形状为 (1, cls_token_num, embed_dim)。
-    #posemb_grid：提取其余 patch 的嵌入，形状为 (num_patches, embed_dim)
     ntok_new -= 1
 
-    gs_old = int(math.sqrt(len(posemb_grid)))#如果原始 patch 数为 196（14x14），则 gs_old = 14。
+    gs_old = int(math.sqrt(len(posemb_grid)))
 
     logger.info('Resized position embedding from size:{} to size: {} with height:{} width: {}'.format(posemb.shape,
                                                                                                       posemb_new.shape,
                                                                                                       hight,
                                                                                                       width))
-    #位置嵌入调整（插值）
+   
     posemb_grid = posemb_grid.reshape(1, gs_old, gs_old, -1).permute(0, 3, 1, 2)
     posemb_grid = F.interpolate(posemb_grid, size=(hight, width), mode='bilinear')
     posemb_grid = posemb_grid.permute(0, 2, 3, 1).reshape(1, hight * width, -1)
@@ -956,14 +948,13 @@ class Vision_Transformer_APAN(nn.Module):
         # VDT
         local_features = self.base(x, camera_id=camera_id)
         local_feat = self.b1(local_features)
-        global_features = local_feat[:, 0:1]#全局特征clstorch.Size([16, 1, 768])
-        view_features = local_feat[:, 1:2]#视觉特征torch.Size([16, 1, 768])
-        local_feat = local_features[:, 2:]#剩余特征[128,210,768]
+        global_features = local_feat[:, 0:1]
+        view_features = local_feat[:, 1:2]
+        local_feat = local_features[:, 2:]
 
-        #Global_ALL
+        
         global_features = global_features - view_features
-        # global_features=self.HTMG(global_features,conv_feats)
-
+      
 
         concat_token = torch.cat((global_features,local_feat),dim=1)
         concat_token = self.b1(concat_token) 
