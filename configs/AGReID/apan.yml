@@ -21,8 +21,8 @@ MODEL:
     USE_PRM: True
     USE_GATE: True
     TOPK: 16
-    DELTA1: 1.0
-    DELTA2: 1.0
+    DELTA1: 0.9
+    DELTA2: 0.2
 
 
   HEADS:

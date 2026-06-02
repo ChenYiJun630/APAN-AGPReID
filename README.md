@@ -1,8 +1,31 @@
 
-<h1 align="center">APAN: Adaptive Prototype-Aware Attention Network for Aerial-Ground Person Re-Identification</h1>
-<h3 align="center">Xianxian Zeng, Yijun Chen, Jun Yuan, Jiawen Li, Rongjun Chen, Huimin Zhao, Jinchang Ren, Shun Liu*</h3>
+
+<div align="center">
+
+# APAN: Adaptive Prototype-Aware Attention Network for Aerial-Ground Person Re-Identification
 
 
+
+[Xianxian Zeng](), 
+[Yijun Chen](https://github.com/ChenYiJun630), 
+[Jun Yuan](), 
+[Jiawen Li](), 
+[Rongjun Chen](), 
+[Huimin Zhao](), 
+[Jinchang Ren](), 
+[Shun Liu*]()
+
+
+[![Paper](https://img.shields.io/badge/Paper-arXiv%3A2504.09549-b31b1b.svg)]()
+[![PDF](https://img.shields.io/badge/PDF-arXiv-2b6cb0.svg)]()
+[![Venue](https://img.shields.io/badge/Venue-IEEE%20TMM%202026-111827.svg)](https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=83)
+[![Python](https://img.shields.io/badge/Python-3.11-3776ab.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.5-ee4c2c.svg)](https://pytorch.org/)
+[![CUDA](https://img.shields.io/badge/CUDA-12.1-76b900.svg)](https://developer.nvidia.com/cuda-toolkit)
+[![License](https://img.shields.io/badge/License-Apach-red.svg)](LICENSE)
+
+
+</div>
 
 ## 📝 Abstract
 Aerial-Ground Person Re-identification (AGPReID), which aims to match pedestrians across UAV and ground cameras, represents a critical multi-modal retrieval task at the intersection of vision and multimedia analysis. While effective in homogeneous settings, conventional person Re-identification (ReID) models falter under the extreme viewpoint and domain disparity inherent to AGPReID, rendering global features inadequate. Current methods seeking view-invariant representations still face difficulties in capturing robust local features, hampered by large intra-class variations and subtle inter-class differences. To address this, we propose an Adaptive Prototype-aware Attention Network (APAN) that learns view-invariant local features without auxiliary supervision. APAN operates through two synergistic modules: a Prototype Relation Modeling (PRM) module that establishes dynamic semantic centers and token-prototype associations, and a Prototype Information Flow Module (PIFM) that refines and propagates prototype-enhanced features in a closed loop. Furthermore, we introduce an Adaptive Distributional Margin Loss, which employs a mode-seeking mechanism to sharpen intra-class distributions and widen inter-class margins. Extensive experiments on three benchmarks validate that our approach achieves state-of-the-art performance.
